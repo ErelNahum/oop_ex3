@@ -1,10 +1,11 @@
 package image_char_matching;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 
 public class SubImgCharMatcher {
-    private final TreeMap<Double, Character> charBrightnessMap;
+    private TreeMap<Double, Character> charBrightnessMap;
 
     public SubImgCharMatcher(char[] charset) {
         this.charBrightnessMap = new TreeMap<>();
@@ -12,6 +13,7 @@ public class SubImgCharMatcher {
             double brightness = calculateBrightnessForChar(c);
             charBrightnessMap.put(brightness, c);
         }
+        normalizeBrightnessMap();
     }
 
     public char getCharByImageBrightness(double brightness) {
@@ -55,6 +57,21 @@ public class SubImgCharMatcher {
         }
 
         return (double) whitePixelCount / totalPixelCount;
+    }
+
+    private void normalizeBrightnessMap() {
+        double minBrightness = charBrightnessMap.firstKey();
+        double maxBrightness = charBrightnessMap.lastKey();
+
+        TreeMap<Double, Character> tempMap = new TreeMap<>();
+
+        for (Map.Entry<Double, Character> entry : charBrightnessMap.entrySet()) {
+            tempMap.put(
+                    (entry.getKey() - minBrightness) / (maxBrightness - minBrightness),
+                    entry.getValue()
+            );
+        }
+        charBrightnessMap = tempMap;
     }
 }
 
