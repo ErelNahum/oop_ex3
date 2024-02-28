@@ -68,15 +68,15 @@ public class Shell {
     private void handleUserInput(String userInput){
         if (userInput.equals("chars")){
             printCharSet();
-        }else if(userInput.startsWith("add ")){
+        }else if(userInput.startsWith("add ") || userInput.equals("add")){
             handleAdd(userInput);
-        }else if(userInput.startsWith("remove ")){
+        }else if(userInput.startsWith("remove ") || userInput.equals("remove")){
             handleRemove(userInput);
-        }else if(userInput.startsWith("res ")){
+        }else if(userInput.startsWith("res ") || userInput.equals("res")){
             handleRes(userInput);
-        }else if(userInput.startsWith("image ")){
+        }else if(userInput.startsWith("image ") || userInput.equals("image")){
             handleImage(userInput);
-        }else if(userInput.startsWith("output ")){
+        }else if(userInput.startsWith("output ") || userInput.equals("output")){
             handleOutput(userInput);
         }else if(userInput.equals("asciiArt")){
             handleAsciiArt();
@@ -85,6 +85,10 @@ public class Shell {
         }
     }
     private void handleAsciiArt(){
+        if(charset.length == 0){
+            System.out.println("Did not execute. Charset is empty.");
+            return;
+        }
         AsciiArtAlgorithm asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, charset);
 
         // Run the algorithm
@@ -249,6 +253,15 @@ public class Shell {
     private char[] removeCharFromCharset(char[] charset, char charToRemove) {
         if(charset.length == 0){
             return new char[0];
+        }
+        boolean appeared = false;
+        for (int i = 0; i < charset.length; i++) {
+            if(charset[i] == charToRemove){
+                appeared = true;
+            }
+        }
+        if(!appeared){
+            return charset;
         }
         int j = 0;
         char[] newCharSet = new char[charset.length-1];
