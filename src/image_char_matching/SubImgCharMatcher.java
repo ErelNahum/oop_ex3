@@ -11,6 +11,11 @@ public class SubImgCharMatcher {
         this.charBrightnessMap = new TreeMap<>();
         for (char c : charset) {
             double brightness = calculateBrightnessForChar(c);
+            if(charBrightnessMap.get(brightness) != null){
+                if((int)c > (int)charBrightnessMap.get(brightness)){
+                    continue;
+                }
+            }
             charBrightnessMap.put(brightness, c);
         }
         normalizeBrightnessMap();
