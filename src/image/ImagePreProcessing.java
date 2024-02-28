@@ -16,15 +16,15 @@ public class ImagePreProcessing {
 
         for (int i = 0; i < newHeight; i++) {
             for (int j = 0; j < newWidth; j++) {
-                if (i <= heightMargin || // top margin
-                        newHeight - heightMargin - 1 < i || // bottom margin
-                        j <= widthMargin  || // left margin
-                        newWidth - widthMargin - 1 < j // right margin
+                if (i < heightMargin || // top margin
+                        newHeight - heightMargin  <= i || // bottom margin
+                        j < widthMargin  || // left margin
+                        newWidth - widthMargin  <= j // right margin
                 ) {
                     paddedImage[i][j] = MARGIN_COLOR;
                 } else {
 
-                    paddedImage[i][j] = sourceImage.getPixel(Math.max(i - heightMargin-1,0), Math.max(j - widthMargin-1,0));
+                    paddedImage[i][j] = sourceImage.getPixel(i - heightMargin, j - widthMargin);
                 }
             }
         }
