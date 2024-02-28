@@ -3,8 +3,8 @@ package image;
 import java.awt.Color;
 
 public class SubImage{
-    private Image image;
-    private int resolution;
+    private final Image image;
+    private final int resolution;
     public SubImage(Image image, int resolution){
         this.image = image;
         this.resolution = resolution;
