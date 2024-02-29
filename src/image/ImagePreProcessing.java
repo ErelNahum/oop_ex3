@@ -2,8 +2,18 @@ package image;
 
 import java.awt.Color;
 
+/**
+ * "static" class responsible for image processing (padding).
+ */
 public class ImagePreProcessing {
     private static final Color MARGIN_COLOR = Color.WHITE;
+
+    /**
+     * Pad image.
+     *
+     * @param sourceImage the source image
+     * @return new padded image
+     */
     public static Image padImage(Image sourceImage) {
         Color[][] paddedImage;
         int newWidth = ImagePreProcessing.closestPowerOfTwo(sourceImage.getWidth());

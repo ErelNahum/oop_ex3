@@ -1,61 +1,46 @@
 package image;
 
-import java.awt.Color;
+import java.awt.*;
 
-public class SubImage{
-    private final Image image;
-    private final int resolution;
-    public SubImage(Image image, int resolution){
-        this.image = image;
-        this.resolution = resolution;
-    }
-    public Color[][][][] divideImage(int resolution) {
-        int height = image.getHeight();
-        int width = image.getWidth();
+/**
+ * Represents a sub-image.
+ */
+public class SubImage extends Image{
 
-        int subImageSize = Math.max(1,width / resolution);
-        int resolutionY = height / subImageSize;
-        Color[][][][] dividedImages = new Color[resolutionY][resolution][][];
+    /**
+     * Instantiates a new Sub image.
+     *
+     * @param image         the image
+     * @param blockSize     the block size
+     * @param verticalPos   the vertical pos
+     * @param horizontalPos the horizontal pos
+     */
+    public SubImage(Image image, int blockSize, int verticalPos, int horizontalPos) {
+        super(new Color[blockSize][blockSize], blockSize, blockSize);
 
-        for (int i = 0; i < resolutionY; i++) {
-            for (int j = 0; j < resolution; j++) {
-                int startRow = i * subImageSize;
-                int startCol = j * subImageSize;
-
-                Color[][] subImage = new Color[subImageSize][subImageSize];
-
-                for (int row = 0; row < subImageSize; row++) {
-                    for (int col = 0; col < subImageSize; col++) {
-                        subImage[row][col] = image.getPixel(startRow + row,startCol + col);
-                    }
-                }
-
-                dividedImages[i][j] = subImage;
+        for (int i = 0; i < blockSize; i++) {
+            for (int j = 0; j < blockSize; j++) {
+                this.pixelArray[i][j] = image.getPixel(
+                        blockSize * verticalPos + i,
+                        blockSize * horizontalPos + j
+                );
             }
         }
-        return dividedImages;
     }
 
-    public double rgbToGreySubImage(Color[][] image){
+    /**
+     * Calculates brightness of entire sub-image.
+     *
+     * @return the brightness
+     */
+    public double getBrightness() {
         double brightness = 0;
-        for(int row = 0; row < image.length; row++){
-            for(int col = 0; col < image[0].length; col++){
-                Color color = image[row][col];
-                double greyPixel = color.getRed() * 0.2126 + color.getGreen() * 0.7152 + color.getBlue() * 0.0722;
-                brightness += greyPixel;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                Color color = this.getPixel(i, j);
+                brightness += color.getRed() * 0.2126 + color.getGreen() * 0.7152 + color.getBlue() * 0.0722;
             }
         }
-        return brightness / (image.length * image[0].length * 255);
-    }
-
-    public double[][] imageBrightness(){
-        Color[][][][] dividedImages = divideImage(resolution);
-        double[][] brightness = new double[dividedImages.length][dividedImages[0].length];
-        for (int i = 0; i < dividedImages.length; i++) {
-            for (int j = 0; j < dividedImages[0].length; j++) {
-                brightness[i][j] = rgbToGreySubImage(dividedImages[i][j]);
-            }
-        }
-        return brightness;
+        return brightness / (height * width * 255);
     }
 }

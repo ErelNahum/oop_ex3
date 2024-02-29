@@ -1,33 +1,52 @@
 package image_char_matching;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 
+/**
+ * Responsible for matching characters for given brightness.
+ */
 public class SubImgCharMatcher {
-    private TreeMap<Double, Character> charBrightnessMap;
+    private final TreeMap<Double, Character> charBrightnessMap;
 
+    /**
+     * Instantiates a new Sub img char matcher.
+     *
+     * @param charset the charset
+     */
     public SubImgCharMatcher(char[] charset) {
         this.charBrightnessMap = new TreeMap<>();
         for (char c : charset) {
             double brightness = calculateBrightnessForChar(c);
-            if(charBrightnessMap.get(brightness) != null){
-                if((int)c > (int)charBrightnessMap.get(brightness)){
-                    continue;
+            // if character's brightness already exists in map, choose the lowest ascii value
+            if(charBrightnessMap.containsKey(brightness)){
+                if (c < charBrightnessMap.get(brightness)) {
+                    charBrightnessMap.replace(brightness, c);
                 }
             }
-            charBrightnessMap.put(brightness, c);
+            else {
+                charBrightnessMap.put(brightness, c);
+            }
         }
-        normalizeBrightnessMap();
     }
 
+    /**
+     * Gets char by image brightness.
+     *
+     * @param brightness the brightness
+     * @return the corresponding character
+     */
     public char getCharByImageBrightness(double brightness) {
 
-        double closestFromTheRight = charBrightnessMap.ceilingKey(brightness);
-        double closestFromTheLeft = charBrightnessMap.floorKey(brightness);
+        double minBrightness = charBrightnessMap.firstKey();
+        double maxBrightness = charBrightnessMap.lastKey();
+        double updatedBrightness = (maxBrightness - minBrightness) * brightness + minBrightness;
+        double closestFromTheRight = charBrightnessMap.ceilingKey(updatedBrightness);
+        double closestFromTheLeft = charBrightnessMap.floorKey(updatedBrightness);
         double closestKey;
 
-        if (Math.abs(brightness - closestFromTheLeft) <= Math.abs(brightness - closestFromTheRight)) {
+        if (Math.abs(updatedBrightness - closestFromTheLeft) <=
+                Math.abs(updatedBrightness - closestFromTheRight)) {
             closestKey = closestFromTheLeft;
         }
         else {
@@ -37,11 +56,21 @@ public class SubImgCharMatcher {
         return charBrightnessMap.get(closestKey);
     }
 
+    /**
+     * Add char to charset.
+     *
+     * @param c the character to be added.
+     */
     public void addChar(char c) {
         double brightness = calculateBrightnessForChar(c);
         charBrightnessMap.put(brightness, c);
     }
 
+    /**
+     * Remove char from charset.
+     *
+     * @param c the character to be removed
+     */
     public void removeChar(char c) {
         charBrightnessMap.values().remove(c);
     }
@@ -64,19 +93,24 @@ public class SubImgCharMatcher {
         return (double) whitePixelCount / totalPixelCount;
     }
 
-    private void normalizeBrightnessMap() {
-        double minBrightness = charBrightnessMap.firstKey();
-        double maxBrightness = charBrightnessMap.lastKey();
+    /**
+     * Checks if charset is empty.
+     *
+     * @return the boolean
+     */
+    public boolean isEmpty() {
+        return charBrightnessMap.isEmpty();
+    }
 
-        TreeMap<Double, Character> tempMap = new TreeMap<>();
-
-        for (Map.Entry<Double, Character> entry : charBrightnessMap.entrySet()) {
-            tempMap.put(
-                    (entry.getKey() - minBrightness) / (maxBrightness - minBrightness),
-                    entry.getValue()
-            );
-        }
-        charBrightnessMap = tempMap;
+    /**
+     * Gets sorted list of charset.
+     *
+     * @return the list
+     */
+    public List<Character> getCharSet() {
+        ArrayList<Character> charset = new ArrayList<>(charBrightnessMap.values());
+        java.util.Collections.sort(charset);
+        return charset;
     }
 }
 

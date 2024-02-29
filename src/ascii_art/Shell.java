@@ -1,37 +1,51 @@
 package ascii_art;
 
+import ascii_output.AsciiOutput;
 import ascii_output.ConsoleAsciiOutput;
 import ascii_output.HtmlAsciiOutput;
 import image.Image;
-
+import image_char_matching.SubImgCharMatcher;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 
+/**
+ * Class Shell.
+ * Responsible for Command Line Interface.
+ */
 public class Shell {
     private int resolution;
-    private char[] charset;
-    private final int DEFUALT_RESOLUTION = 128;
+    private final int DEFAULT_RESOLUTION = 128;
     private int minResolution;
     private int maxResolution;
     private Image image;
-    private boolean outputToConsole = true;
+    private String imageName;
     private HtmlAsciiOutput htmlAsciiOutput;
     private ConsoleAsciiOutput consoleAsciiOutput;
+    private AsciiOutput asciiOutput;
+    private SubImgCharMatcher subImgCharMatcher;
+    private HashMap<String, HashMap<Integer, char[][]>> asciiCache;
+
+    /**
+     * the main method of shell.
+     */
     public void run(){
         // Set the image
+        imageName = "cat.jpeg";
         try {
-            image = setImage("cat.jpeg");
+            image = setImage(imageName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        // Change this to your desired resolution
-        charset = "7890123456".toCharArray();
+        // ??
+        char[] charset = "7890123456".toCharArray();
+        subImgCharMatcher = new SubImgCharMatcher(charset);
 
         // Initialize the outputs
         htmlAsciiOutput = new HtmlAsciiOutput("output.html", "Courier New");
         consoleAsciiOutput = new ConsoleAsciiOutput();
+
+        asciiCache = new HashMap<>();
 
         // Receive input from the user
         while (true) {
@@ -45,11 +59,12 @@ public class Shell {
         }
     }
     private Image setImage(String fileName) throws IOException{
+        imageName = fileName;
         Image newImage;
         newImage = new Image(fileName);
 
         // Set resolution and charset
-        resolution = DEFUALT_RESOLUTION;
+        resolution = DEFAULT_RESOLUTION;
         minResolution = Math.max(1, newImage.getWidth()/ newImage.getHeight());
         maxResolution = newImage.getWidth();
         if(resolution > maxResolution){
@@ -60,10 +75,8 @@ public class Shell {
         return newImage;
     }
     private String getInput(){
-        KeyboardInput keyboardInput = KeyboardInput.getObject();
         System.out.print(">>> ");
-        String userInput = KeyboardInput.readLine();
-        return userInput;
+        return KeyboardInput.readLine();
     }
     private void handleUserInput(String userInput){
         if (userInput.equals("chars")){
@@ -85,26 +98,32 @@ public class Shell {
         }
     }
     private void handleAsciiArt(){
-        if(charset.length == 0){
+        if(subImgCharMatcher.isEmpty()){
             System.out.println("Did not execute. Charset is empty.");
             return;
         }
-        AsciiArtAlgorithm asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, charset);
-
-        // Run the algorithm
-        char[][] asciiArtResult = asciiArtAlgorithm.run();
-
-        if(outputToConsole){
-            consoleAsciiOutput.out(asciiArtResult);
-        }else{
-            htmlAsciiOutput.out(asciiArtResult);
+        char[][] asciiArtResult;
+        if (asciiCache.containsKey(imageName) &&
+                asciiCache.get(imageName).containsKey(resolution)
+        ) {
+            asciiArtResult = asciiCache.get(imageName).get(resolution);
         }
+        else {
+            AsciiArtAlgorithm asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, subImgCharMatcher);
+            asciiArtResult = asciiArtAlgorithm.run();
+            if (!asciiCache.containsKey(imageName)) {
+                asciiCache.put(imageName, new HashMap<>());
+            }
+            asciiCache.get(imageName).put(resolution, asciiArtResult);
+
+        }
+        asciiOutput.out(asciiArtResult);
     }
     private void handleOutput(String userInput){
         if(userInput.equals("output html")){
-            outputToConsole = false;
+            asciiOutput = htmlAsciiOutput;
         }else if(userInput.equals("output console")){
-            outputToConsole = true;
+            asciiOutput = consoleAsciiOutput;
         }else{
             System.out.println("Did not change output method due to incorrect format.");
         }
@@ -115,8 +134,7 @@ public class Shell {
         }
         String fileName = userInput.substring("image ".length());
         try{
-            Image newImage = setImage(fileName);
-            image = newImage;
+            image = setImage(fileName);
         }catch (IOException e){
             System.out.println("Did not execute due to problem with image file.");
         }
@@ -147,53 +165,53 @@ public class Shell {
             System.out.println("Did not add due to incorrect format.");
             return;
         }
+        asciiCache = new HashMap<>();
         userInput = userInput.substring("add ".length());
         if(userInput.equals("all")){
             addAllChars();
         }else if(userInput.equals("space")){
-            charset = addCharToCharset(charset, ' ');
+            subImgCharMatcher.addChar(' ');
         } else if(userInput.length() == 1){
-            charset = addCharToCharset(charset,userInput.charAt(0));
+            subImgCharMatcher.addChar(userInput.charAt(0));
         }else if(userInput.length() == 3 && userInput.charAt(1) == '-'){
-            int first = (int)userInput.charAt(0);
-            int second = (int)userInput.charAt(2);
+            int first = userInput.charAt(0);
+            int second = userInput.charAt(2);
             if(first < second){
                 for (int i = first; i <= second; i++) {
-                    charset = addCharToCharset(charset, (char)i);
+                    subImgCharMatcher.addChar((char)i);
                 }
             }else{
                 for (int i = second; i <= first; i++) {
-                    charset = addCharToCharset(charset, (char)i);
+                    subImgCharMatcher.addChar((char)i);
                 }
             }
         }else{
             System.out.println("Did not add due to incorrect format.");
         }
-
-        charset = removeDuplicates(charset);
     }
     private void handleRemove(String userInput){
         if((userInput.substring("remove".length())).isEmpty()){
             System.out.println("Did not remove due to incorrect format.");
             return;
         }
+        asciiCache = new HashMap<>();
         userInput = userInput.substring("remove ".length());
         if(userInput.equals("all")){
             removeAllChars();
         }else if(userInput.equals("space")){
-            charset = removeCharFromCharset(charset, ' ');
+            subImgCharMatcher.removeChar(' ');
         } else if(userInput.length() == 1){
-            charset = removeCharFromCharset(charset,userInput.charAt(0));
+            subImgCharMatcher.removeChar(userInput.charAt(0));
         }else if(userInput.length() == 3 && userInput.charAt(1) == '-'){
-            int first = (int)userInput.charAt(0);
-            int second = (int)userInput.charAt(2);
+            int first = userInput.charAt(0);
+            int second = userInput.charAt(2);
             if(first < second){
                 for (int i = first; i <= second; i++) {
-                    charset = removeCharFromCharset(charset, (char)i);
+                    subImgCharMatcher.removeChar((char)i);
                 }
             }else{
                 for (int i = second; i <= first; i++) {
-                    charset = removeCharFromCharset(charset, (char)i);
+                    subImgCharMatcher.removeChar((char)i);
                 }
             }
         }else{
@@ -201,78 +219,21 @@ public class Shell {
         }
     }
     private void printCharSet(){
-        // Sorting the char array
-        Arrays.sort(charset);
-
         // Printing the sorted char array with spaces
-        for (char c : charset) {
+        for (char c : subImgCharMatcher.getCharSet()) {
             System.out.print(c + " ");
         }
         System.out.println();
     }
 
-    private char[] addCharToCharset(char[] charset, char newChar) {
-        // Create a new array with increased size
-        char[] newCharset = Arrays.copyOf(charset, charset.length + 1);
-
-        // Add the new char to the end of the array
-        newCharset[newCharset.length - 1] = newChar;
-
-        return newCharset;
-    }
-
     private void addAllChars(){
         for (int i = 32; i <= 126; i++) {
-            char newChar = (char) i;
-            charset = addCharToCharset(charset, newChar);
+            subImgCharMatcher.addChar((char)i);
         }
     }
     private void removeAllChars(){
         for (int i = 32; i <= 126; i++) {
-            char newChar = (char) i;
-            charset = removeCharFromCharset(charset, newChar);
+            subImgCharMatcher.removeChar((char)i);
         }
     }
-    private char[] removeDuplicates(char[] charArray) {
-        // Convert char array to Set to automatically remove duplicates
-        LinkedHashSet<Character> charSet = new LinkedHashSet<>();
-        for (char c : charArray) {
-            charSet.add(c);
-        }
-
-        // Convert Set back to char array
-        char[] uniqueChars = new char[charSet.size()];
-        int index = 0;
-        for (char c : charSet) {
-            uniqueChars[index++] = c;
-        }
-
-        return uniqueChars;
-    }
-
-    private char[] removeCharFromCharset(char[] charset, char charToRemove) {
-        if(charset.length == 0){
-            return new char[0];
-        }
-        boolean appeared = false;
-        for (int i = 0; i < charset.length; i++) {
-            if(charset[i] == charToRemove){
-                appeared = true;
-            }
-        }
-        if(!appeared){
-            return charset;
-        }
-        int j = 0;
-        char[] newCharSet = new char[charset.length-1];
-        for (int i = 0; i < charset.length; i++) {
-            if(charset[i] == charToRemove){
-                continue;
-            }
-            newCharSet[j] = charset[i];
-            j++;
-        }
-        return newCharSet;
-    }
-
 }
