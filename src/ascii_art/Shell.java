@@ -44,6 +44,7 @@ public class Shell {
         // Initialize the outputs
         htmlAsciiOutput = new HtmlAsciiOutput("output.html", "Courier New");
         consoleAsciiOutput = new ConsoleAsciiOutput();
+        asciiOutput = consoleAsciiOutput;
 
         asciiCache = new HashMap<>();
 
