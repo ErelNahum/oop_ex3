@@ -8,6 +8,7 @@ import java.util.*;
  */
 public class SubImgCharMatcher {
     private final TreeMap<Double, Character> charBrightnessMap;
+    private final SortedSet<Character> charSet;
 
     /**
      * Instantiates a new Sub img char matcher.
@@ -16,7 +17,9 @@ public class SubImgCharMatcher {
      */
     public SubImgCharMatcher(char[] charset) {
         this.charBrightnessMap = new TreeMap<>();
+        this.charSet = new TreeSet<>();
         for (char c : charset) {
+            charSet.add(c);
             double brightness = calculateBrightnessForChar(c);
             // if character's brightness already exists in map, choose the lowest ascii value
             if(charBrightnessMap.containsKey(brightness)){
@@ -62,6 +65,7 @@ public class SubImgCharMatcher {
      * @param c the character to be added.
      */
     public void addChar(char c) {
+        charSet.add(c);
         double brightness = calculateBrightnessForChar(c);
         charBrightnessMap.put(brightness, c);
     }
@@ -72,6 +76,7 @@ public class SubImgCharMatcher {
      * @param c the character to be removed
      */
     public void removeChar(char c) {
+        charSet.remove(c);
         charBrightnessMap.values().remove(c);
     }
 
@@ -108,9 +113,7 @@ public class SubImgCharMatcher {
      * @return the list
      */
     public List<Character> getCharSet() {
-        ArrayList<Character> charset = new ArrayList<>(charBrightnessMap.values());
-        java.util.Collections.sort(charset);
-        return charset;
+        return charSet.stream().toList();
     }
 }
 
