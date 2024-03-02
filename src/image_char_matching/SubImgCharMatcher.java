@@ -112,8 +112,8 @@ public class SubImgCharMatcher {
      *
      * @return the list
      */
-    public List<Character> getCharSet() {
-        return charSet.stream().toList();
+    public SortedSet<Character> getCharSet() {
+        return charSet;
     }
 }
 
