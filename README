@@ -16,8 +16,8 @@ erel, dor2810
         iv. class `ImagePreProcessing` - "static" class that handles image padding.
     d. package `CharConverter`:
         i. class `CharConverter` - "static" class responsible for converting characters to boolean 2d arrays.
-        ii. class `SubImgCharMatcher` - responsible for finding the closest char in a certain charset to a given
-            brightness.
+        ii. class `SubImgCharMatcher` - responsible for finding the closest char in a certain charset to a
+            given brightness.
 
 2. We used two main data structures:
     a. TreeMap<double, TreeSet<Character>> - allows finding the closest

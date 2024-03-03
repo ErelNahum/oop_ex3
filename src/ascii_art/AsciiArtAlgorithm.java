@@ -52,15 +52,4 @@ public class AsciiArtAlgorithm {
         return asciiArt;
     }
 
-
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        Shell shell = new Shell();
-        shell.run();
-    }
-
 }

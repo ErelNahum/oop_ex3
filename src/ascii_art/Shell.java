@@ -27,9 +27,20 @@ public class Shell {
     private HashMap<String, HashMap<Integer, char[][]>> asciiCache;
 
     /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
+    public static void main(String[] args) {
+        Shell shell = new Shell();
+        shell.run();
+    }
+
+    /**
      * the main method of shell.
      */
     public void run(){
+        resolution = DEFAULT_RESOLUTION;
         // Set the image
         imageName = "cat.jpeg";
         try {
@@ -53,7 +64,6 @@ public class Shell {
         while (true) {
             String userInput = getInput();
             if (userInput.equals("exit")) {
-                System.out.println("Exiting program.");
                 break;
             } else {
                 try{
@@ -70,14 +80,14 @@ public class Shell {
         newImage = new Image(fileName);
 
         // Set resolution and charset
-        resolution = DEFAULT_RESOLUTION;
+//        resolution = DEFAULT_RESOLUTION;
         minResolution = Math.max(1, newImage.getWidth()/ newImage.getHeight());
         maxResolution = newImage.getWidth();
-        if(resolution > maxResolution){
-            resolution = maxResolution;
-        }else if(resolution < minResolution){
-            resolution = minResolution;
-        }
+//        if(resolution > maxResolution){
+//            resolution = maxResolution;
+//        }else if(resolution < minResolution){
+//            resolution = minResolution;
+//        }
         return newImage;
     }
     private String getInput(){

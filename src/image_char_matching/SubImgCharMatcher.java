@@ -62,8 +62,9 @@ public class SubImgCharMatcher {
             charBrightnessMap.get(brightness).add(c);
         }
         else {
-            charBrightnessMap.put(brightness, new TreeSet<>());
-            charBrightnessMap.get(brightness).add(c);
+            TreeSet<Character> treeSet = new TreeSet<>();
+            treeSet.add(c);
+            charBrightnessMap.put(brightness, treeSet);
         }
     }
 
@@ -73,9 +74,14 @@ public class SubImgCharMatcher {
      * @param c the character to be removed
      */
     public void removeChar(char c) {
-        charSet.remove(c);
-        double brightness = calculateBrightnessForChar(c);
-        charBrightnessMap.get(brightness).remove(c);
+        if (charSet.contains(c)) {
+            charSet.remove(c);
+            double brightness = calculateBrightnessForChar(c);
+            charBrightnessMap.get(brightness).remove(c);
+            if (charBrightnessMap.get(brightness).isEmpty()) {
+                charBrightnessMap.remove(brightness);
+            }
+        }
     }
 
 
