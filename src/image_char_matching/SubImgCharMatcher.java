@@ -7,7 +7,7 @@ import java.util.*;
  * Responsible for matching characters for given brightness.
  */
 public class SubImgCharMatcher {
-    private final TreeMap<Double, Character> charBrightnessMap;
+    private final TreeMap<Double, TreeSet<Character>> charBrightnessMap;
     private final SortedSet<Character> charSet;
 
     /**
@@ -19,17 +19,7 @@ public class SubImgCharMatcher {
         this.charBrightnessMap = new TreeMap<>();
         this.charSet = new TreeSet<>();
         for (char c : charset) {
-            charSet.add(c);
-            double brightness = calculateBrightnessForChar(c);
-            // if character's brightness already exists in map, choose the lowest ascii value
-            if(charBrightnessMap.containsKey(brightness)){
-                if (c < charBrightnessMap.get(brightness)) {
-                    charBrightnessMap.replace(brightness, c);
-                }
-            }
-            else {
-                charBrightnessMap.put(brightness, c);
-            }
+            addChar(c);
         }
     }
 
@@ -56,7 +46,7 @@ public class SubImgCharMatcher {
             closestKey = closestFromTheRight;
         }
 
-        return charBrightnessMap.get(closestKey);
+        return charBrightnessMap.get(closestKey).first();
     }
 
     /**
@@ -67,7 +57,14 @@ public class SubImgCharMatcher {
     public void addChar(char c) {
         charSet.add(c);
         double brightness = calculateBrightnessForChar(c);
-        charBrightnessMap.put(brightness, c);
+        // if character's brightness already exists in map, choose the lowest ascii value
+        if(charBrightnessMap.containsKey(brightness)){
+            charBrightnessMap.get(brightness).add(c);
+        }
+        else {
+            charBrightnessMap.put(brightness, new TreeSet<>());
+            charBrightnessMap.get(brightness).add(c);
+        }
     }
 
     /**
@@ -77,7 +74,8 @@ public class SubImgCharMatcher {
      */
     public void removeChar(char c) {
         charSet.remove(c);
-        charBrightnessMap.values().remove(c);
+        double brightness = calculateBrightnessForChar(c);
+        charBrightnessMap.get(brightness).remove(c);
     }
 
 

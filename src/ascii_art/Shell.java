@@ -38,10 +38,7 @@ public class Shell {
         }
 
         // ??
-        char[] charset = new char[126 - 32 + 1];
-        for (int i = 32; i <= 126; i++) {
-            charset[i - 32] = (char)i;
-        }
+        char[] charset = "0123456789".toCharArray();
         subImgCharMatcher = new SubImgCharMatcher(charset);
 
         // Initialize the outputs
