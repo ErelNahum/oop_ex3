@@ -3,6 +3,7 @@ package ascii_art;
 import ascii_output.AsciiOutput;
 import ascii_output.ConsoleAsciiOutput;
 import ascii_output.HtmlAsciiOutput;
+import exceptions.*;
 import image.Image;
 import image_char_matching.SubImgCharMatcher;
 import java.io.IOException;
@@ -55,11 +56,15 @@ public class Shell {
                 System.out.println("Exiting program.");
                 break;
             } else {
-                handleUserInput(userInput);
+                try{
+                    handleUserInput(userInput);
+                }catch(IOException e){
+                    System.out.println(e.getMessage());
+                }
             }
         }
     }
-    private Image setImage(String fileName) throws IOException{
+    private Image setImage(String fileName) throws IOException, ImageIOException {
         imageName = fileName;
         Image newImage;
         newImage = new Image(fileName);
@@ -79,7 +84,7 @@ public class Shell {
         System.out.print(">>> ");
         return KeyboardInput.readLine();
     }
-    private void handleUserInput(String userInput){
+    private void handleUserInput(String userInput) throws IOException {
         if (userInput.equals("chars")){
             printCharSet();
         }else if(userInput.startsWith("add ") || userInput.equals("add")){
@@ -95,13 +100,12 @@ public class Shell {
         }else if(userInput.equals("asciiArt")){
             handleAsciiArt();
         }else{
-            System.out.println("Did not execute due to incorrect command.");
+            throw new NameIOException();
         }
     }
-    private void handleAsciiArt(){
+    private void handleAsciiArt() throws EmptyCharSetIOException {
         if(subImgCharMatcher.isEmpty()){
-            System.out.println("Did not execute. Charset is empty.");
-            return;
+            throw new EmptyCharSetIOException();
         }
         char[][] asciiArtResult;
         if (asciiCache.containsKey(imageName) &&
@@ -120,16 +124,16 @@ public class Shell {
         }
         asciiOutput.out(asciiArtResult);
     }
-    private void handleOutput(String userInput){
+    private void handleOutput(String userInput) throws OutputIOException {
         if(userInput.equals("output html")){
             asciiOutput = htmlAsciiOutput;
         }else if(userInput.equals("output console")){
             asciiOutput = consoleAsciiOutput;
         }else{
-            System.out.println("Did not change output method due to incorrect format.");
+            throw new OutputIOException();
         }
     }
-    private void handleImage(String userInput){
+    private void handleImage(String userInput) throws ImageIOException{
         if(userInput.length() <= "image ".length()){
             return;
         }
@@ -137,17 +141,17 @@ public class Shell {
         try{
             image = setImage(fileName);
         }catch (IOException e){
-            System.out.println("Did not execute due to problem with image file.");
+            throw new ImageIOException();
         }
     }
-    private void handleRes(String userInput){
+    private void handleRes(String userInput) throws ResolutionIOException, ResolutionBoundariesIOException {
         if(userInput.equals("res up")){
             if(resolution * 2 <= maxResolution){
                 resolution *= 2;
                 System.out.println(String.format("Resolution set to %s.", resolution));
             }
             else{
-                System.out.println("Did not change resolution due to exceeding boundaries.");
+                throw new ResolutionBoundariesIOException();
             }
         }else if(userInput.equals("res down")){
             if(resolution / 2 >= minResolution){
@@ -155,16 +159,15 @@ public class Shell {
                 System.out.println(String.format("Resolution set to %s.", resolution));
             }
             else{
-                System.out.println("Did not change resolution due to exceeding boundaries.");
+                throw new ResolutionBoundariesIOException();
             }
         }else{
-            System.out.println("Did not change resolution due to incorrect format.");
+            throw new ResolutionIOException();
         }
     }
-    private void handleAdd(String userInput){
+    private void handleAdd(String userInput) throws AddIOException{
         if((userInput.substring("add".length())).isEmpty()){
-            System.out.println("Did not add due to incorrect format.");
-            return;
+            throw new AddIOException();
         }
         asciiCache = new HashMap<>();
         userInput = userInput.substring("add ".length());
@@ -187,13 +190,12 @@ public class Shell {
                 }
             }
         }else{
-            System.out.println("Did not add due to incorrect format.");
+            throw new AddIOException();
         }
     }
-    private void handleRemove(String userInput){
+    private void handleRemove(String userInput) throws RemoveIOException{
         if((userInput.substring("remove".length())).isEmpty()){
-            System.out.println("Did not remove due to incorrect format.");
-            return;
+            throw new RemoveIOException();
         }
         asciiCache = new HashMap<>();
         userInput = userInput.substring("remove ".length());
@@ -216,7 +218,7 @@ public class Shell {
                 }
             }
         }else{
-            System.out.println("Did not remove due to incorrect format.");
+            throw new RemoveIOException();
         }
     }
     private void printCharSet(){
