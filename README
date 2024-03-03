@@ -1,7 +1,24 @@
 erel, dor2810
 325177715, 213222821
 
-1. TODO
+1.
+    a. package `ascii_output`:
+        i. interface `AsciiOutput` - represents an output pipe for ascii art.
+        ii. class `ConsoleAsciiOutput` - implements `AsciiOutput` for console output.
+        iii. class `HtmlAsciiOutput` - implements `AsciiOutput` for html output.
+    b. package `ascii_art`:
+        i. class `AsciiArtAlgorithm` - main class of program. Composes `Image`.
+        ii. class `Shell` - represents a command line interface. Composes `AsciiOutput`, `SubImage`.
+    c. package `image`:
+        i. class `Image` - represents an image.
+        ii. class `SubImage` - represents a sub image, extends `Image`.
+        iii. class `SubImages` - represents a collection of sub-images. Composes `SubImage`.
+        iv. class `ImagePreProcessing` - "static" class that handles image padding.
+    d. package `CharConverter`:
+        i. class `CharConverter` - "static" class responsible for converting characters to boolean 2d arrays.
+        ii. class `SubImgCharMatcher` - responsible for finding the closest char in a certain charset to a given
+            brightness.
+
 2. We used two main data structures:
     a. TreeMap<double, TreeSet<Character>> - allows finding the closest
        character to a certain brightness in O(log(n)) time-complexity.
