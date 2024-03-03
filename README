@@ -2,6 +2,25 @@ erel, dor2810
 325177715, 213222821
 
 1. TODO
-2. TreeMap<double, Character>, HashMap<String, HashMap<int, char[][]>> TODO
-3. TODO
-4. isEmpty(), getChatSet() TODO
+2. We used two main data structures:
+    a. TreeMap<double, TreeSet<Character>> - allows finding the closest
+       character to a certain brightness in O(log(n)) time-complexity.
+    b. HashMap<String, HashMap<Int, char[][]>> - allows caching all the
+       previous ascii-art calculations and restoring it in O(1) time-complexity.
+3. We made a few custom exception classes inherited from java's IOException:
+    - AddIOException
+    - EmptyCharSetIOException
+    - ImageIOException
+    - NameIOException
+    - OutputIOException
+    - RemoveIOException
+    - ResolutionBoundariesIOException
+    - ResolutionIOException
+    Each custom exception stores in it's constructor a corresponding error
+    message. Then, the `run()` function catches it and prints the error message.
+4. We added two public methods:
+    - isEmpty() - if charset is empty, convenient for `Shell`.
+    - getChatSet() - returns a sorted Iterable of charset for `Shell`
+5. Changes in `Image` class:
+    a. width, height, pixelArray - changed access specifier from private to
+       protected. Such that `SubImage`'s constructor would be more convenient.
